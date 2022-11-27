@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 
-class NewTransaction extends StatelessWidget {
-  final titleController = TextEditingController();
-  final amountCountroller = TextEditingController();
-
+class NewTransaction extends StatefulWidget {
   final Function(String, double) onSumbit;
 
-  NewTransaction(this.onSumbit, {super.key});
+  const NewTransaction(this.onSumbit, {super.key});
+
+  @override
+  State<NewTransaction> createState() => _NewTransactionState();
+}
+
+class _NewTransactionState extends State<NewTransaction> {
+  final titleController = TextEditingController();
+
+  final amountCountroller = TextEditingController();
+
+  void submitData() {
+    final enteredTitle = titleController.text;
+    final enteredAmount = double.parse(amountCountroller.text);
+
+    if (enteredTitle.isEmpty || enteredAmount <= 0) {
+      return;
+    }
+
+    widget.onSumbit(enteredTitle, enteredAmount);
+
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,22 +39,16 @@ class NewTransaction extends StatelessWidget {
             TextField(
               decoration: const InputDecoration(labelText: 'Title'),
               controller: titleController,
-              // onChanged: (value) {
-              //   _titleInput = value;
-              // },
             ),
             TextField(
               decoration: const InputDecoration(labelText: 'Amount'),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              onSubmitted: (_) => submitData(),
               controller: amountCountroller,
-              // onChanged: (value) {
-              //   _amountInput = value;
-              // },
             ),
             TextButton(
-              onPressed: () {
-                onSumbit(titleController.value.text,
-                    double.parse(amountCountroller.value.text));
-              },
+              onPressed: submitData,
               child: const Text('Add Transaction'),
             )
           ],

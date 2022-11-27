@@ -1,9 +1,8 @@
-import 'package:expense_management/models/transaction.dart';
 import 'package:expense_management/widgets/new_transaction.dart';
-import 'package:expense_management/widgets/transaction_list.dart';
-import 'package:expense_management/widgets/user_transaction.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
+import 'models/transaction.dart';
+import 'widgets/transaction_list.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,34 +16,103 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: MyHomePage(),
+      theme: ThemeData(
+          primarySwatch: Colors.purple,
+          // colorScheme:ColorScheme.fromSwtch().copyWith(primary: Colors.purple, secondary: Colors.amber), // something is broken here still
+          fontFamily: 'Quicksand',
+          textTheme: ThemeData.light().textTheme.copyWith(
+                headline6: const TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'OpenSans',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+          appBarTheme: const AppBarTheme(
+            titleTextStyle: TextStyle(
+                color: Colors.black,
+                fontFamily: 'OpenSans',
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+          useMaterial3: true),
+      home: const MyHomePage(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  late String _titleInput;
-  late String _amountInput;
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
 
-  MyHomePage({super.key});
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  final List<Transaction> _userTransactions = [
+    Transaction(
+        id: 't1', title: 'New Shoes', amount: 69.99, date: DateTime.now()),
+    Transaction(
+        id: 't2',
+        title: 'Weekly Groceries',
+        amount: 16.53,
+        date: DateTime.now())
+  ];
+
+  void _addNewTransaction(String title, double amount) {
+    final newTx = Transaction(
+        id: DateTime.now().toString(),
+        title: title,
+        amount: amount,
+        date: DateTime.now());
+
+    setState(() {
+      _userTransactions.add(newTx);
+    });
+  }
+
+  void _startAddNewTransaction(BuildContext ctx) {
+    showModalBottomSheet(
+        context: ctx,
+        builder: (bCtx) {
+          return NewTransaction(_addNewTransaction);
+
+          // // old method to fix an issue
+          // return GestureDetector(
+          //   onTap: () {},
+          //   behavior: HitTestBehavior.opaque,
+          //   child: NewTransaction(_addNewTransaction),
+          // );
+        });
+  }
 
   @override
   Widget build(context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Expense Management')),
+      appBar: AppBar(
+        title: const Text('Personal Expenses'),
+        actions: [
+          IconButton(
+              onPressed: () => _startAddNewTransaction(context),
+              icon: const Icon(Icons.add))
+        ],
+      ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: const [
-          SizedBox(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(
             width: double.infinity,
             child: Card(
               elevation: 5,
               child: Text('CHART!'),
             ),
           ),
-          UserTransactions()
+          TransactionList(_userTransactions)
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _startAddNewTransaction(context),
+        child: const Icon(Icons.add),
       ),
     );
   }
