@@ -2,6 +2,7 @@ import 'package:expense_management/widgets/new_transaction.dart';
 import 'package:flutter/material.dart';
 
 import 'models/transaction.dart';
+import 'widgets/chart.dart';
 import 'widgets/transaction_list.dart';
 
 void main() {
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
           primarySwatch: Colors.purple,
+          accentColor: Colors.amber,
           // colorScheme:ColorScheme.fromSwtch().copyWith(primary: Colors.purple, secondary: Colors.amber), // something is broken here still
           fontFamily: 'Quicksand',
           textTheme: ThemeData.light().textTheme.copyWith(
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
                 fontSize: 20,
                 fontWeight: FontWeight.bold),
           ),
-          useMaterial3: true),
+          useMaterial3: false),
       home: const MyHomePage(),
     );
   }
@@ -49,14 +51,21 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final List<Transaction> _userTransactions = [
-    Transaction(
-        id: 't1', title: 'New Shoes', amount: 69.99, date: DateTime.now()),
-    Transaction(
-        id: 't2',
-        title: 'Weekly Groceries',
-        amount: 16.53,
-        date: DateTime.now())
+    // Transaction(
+    //     id: 't1', title: 'New Shoes', amount: 69.99, date: DateTime.now()),
+    // Transaction(
+    //     id: 't2',
+    //     title: 'Weekly Groceries',
+    //     amount: 16.53,
+    //     date: DateTime.now())
   ];
+
+  List<Transaction> get _recentTransactions {
+    return _userTransactions
+        .where((tx) =>
+            tx.date.isAfter(DateTime.now().subtract(const Duration(days: 7))))
+        .toList();
+  }
 
   void _addNewTransaction(String title, double amount) {
     final newTx = Transaction(
@@ -99,13 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const SizedBox(
-            width: double.infinity,
-            child: Card(
-              elevation: 5,
-              child: Text('CHART!'),
-            ),
-          ),
+          Chart(_recentTransactions),
           TransactionList(_userTransactions)
         ],
       ),
